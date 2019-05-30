@@ -60,3 +60,19 @@ func TestLatLon(t *testing.T) {
 	result := TagEncoder(LatLon, "0;7;53.612224;86.890426")
 	assert.Equal(t, "3007c00e3203bad72d05", result)
 }
+
+func TestEncodeSpeedNDirection(t *testing.T) {
+	result := TagEncoder(SpeedNDirection, "9.2;212")
+	assert.Equal(t, "335c004808", result)
+
+	result2 := TagEncoder(SpeedNDirection, "45.2;90")
+	assert.Equal(t, "33c4018403", result2)
+}
+
+func TestEncodeHeightMeters(t *testing.T) {
+	result := TagEncoder(HeightMeters, "100")
+	assert.Equal(t, "346400", result)
+
+	result2 := TagEncoder(HeightMeters, "1000")
+	assert.Equal(t, "34e803", result2)
+}
