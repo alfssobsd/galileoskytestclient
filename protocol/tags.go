@@ -20,6 +20,9 @@ const (
 	HeightMeters
 	HDOP
 	HWStatus
+	SupplyVoltage
+	BetteryVoltage
+	TemperatureOfTerminal
 )
 
 func TagEncoder(tag int, value string) string {
@@ -48,6 +51,12 @@ func TagEncoder(tag int, value string) string {
 		return encodeHdop(value)
 	case HWStatus:
 		return encodeHWstatus(value)
+	case SupplyVoltage:
+		return encodeSupplyVoltage(value)
+	case BetteryVoltage:
+		return encodeBatteryVoltage(value)
+	case TemperatureOfTerminal:
+		return encodeTemperatureOfTerminal(value)
 	default:
 		return "unknow type"
 	}
@@ -218,6 +227,8 @@ func encodeHdop(value string) string {
 // 12 - 13: quality of signal 0 to 3, less is good
 // 14: 0 - alarm on, 1 - alarm off
 // 15: 0 - all fine, 1 - alarm triggered
+//
+// return ecnode tag as hex string
 func encodeHWstatus(value string) string {
 	arr := strings.Split(value, ";")
 	tmp := uint16(0)
@@ -232,4 +243,40 @@ func encodeHWstatus(value string) string {
 	binary.LittleEndian.PutUint16(bs, uint16(tmp))
 
 	return "40" + hex.EncodeToString(bs[:])
+}
+
+// Encode tag 0x41
+// value = uint, supply voltage in volts
+//
+// return encode tag as hex string
+func encodeSupplyVoltage(value string) string {
+	i, _ := strconv.Atoi(value)
+	bs := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bs, uint16(i))
+
+	return "41" + hex.EncodeToString(bs[:])
+}
+
+// Encode tag 0x42
+// value = uint, battery voltage
+//
+// return encode tag as hex string
+func encodeBatteryVoltage(value string) string {
+	i, _ := strconv.Atoi(value)
+	bs := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bs, uint16(i))
+
+	return "42" + hex.EncodeToString(bs[:])
+}
+
+// Encode tag 0x43
+// value = int, temperature of terminal in degrees Celsius
+//
+// return encode tag as hex string
+func encodeTemperatureOfTerminal(value string) string {
+	i, _ := strconv.Atoi(value)
+	bs := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bs, uint16(i))
+
+	return "43" + hex.EncodeToString(bs[:1])
 }

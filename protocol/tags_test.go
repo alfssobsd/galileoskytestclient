@@ -92,3 +92,33 @@ func TestEncodeHWstatus(t *testing.T) {
 	result1 := TagEncoder(HWStatus, "1;0;0;1;0;0;0;1;1;0;0;1;1;1;0;0")
 	assert.Equal(t, "408939", result1)
 }
+
+func TestEncodeSupplyVoltage(t *testing.T) {
+	result := TagEncoder(SupplyVoltage, "24")
+	assert.Equal(t, "411800", result)
+
+	result2 := TagEncoder(SupplyVoltage, "300")
+	assert.Equal(t, "412c01", result2)
+}
+
+func TestEncodeBatteryVoltage(t *testing.T) {
+	result := TagEncoder(BetteryVoltage, "24")
+	assert.Equal(t, "421800", result)
+
+	result2 := TagEncoder(BetteryVoltage, "300")
+	assert.Equal(t, "422c01", result2)
+}
+
+func TestEncodeTemperatureOfTerminal(t *testing.T) {
+	result := TagEncoder(TemperatureOfTerminal, "-5")
+	assert.Equal(t, "43fb", result)
+
+	result2 := TagEncoder(TemperatureOfTerminal, "-25")
+	assert.Equal(t, "43e7", result2)
+
+	result3 := TagEncoder(TemperatureOfTerminal, "0")
+	assert.Equal(t, "4300", result3)
+
+	result4 := TagEncoder(TemperatureOfTerminal, "10")
+	assert.Equal(t, "430a", result4)
+}
