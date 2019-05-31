@@ -76,3 +76,19 @@ func TestEncodeHeightMeters(t *testing.T) {
 	result2 := TagEncoder(HeightMeters, "1000")
 	assert.Equal(t, "34e803", result2)
 }
+
+func TestEncodeHdop(t *testing.T) {
+	result := TagEncoder(HDOP, "0")
+	assert.Equal(t, "3500", result)
+
+	result2 := TagEncoder(HDOP, "10")
+	assert.Equal(t, "350a", result2)
+}
+
+func TestEncodeHWstatus(t *testing.T) {
+	result := TagEncoder(HWStatus, "1;0;0;1;0;0;0;1;1;0;0;1;1;1;1;1")
+	assert.Equal(t, "4089f9", result)
+
+	result1 := TagEncoder(HWStatus, "1;0;0;1;0;0;0;1;1;0;0;1;1;1;0;0")
+	assert.Equal(t, "408939", result1)
+}

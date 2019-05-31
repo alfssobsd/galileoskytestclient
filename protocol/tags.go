@@ -18,6 +18,8 @@ const (
 	LatLon
 	SpeedNDirection
 	HeightMeters
+	HDOP
+	HWStatus
 )
 
 func TagEncoder(tag int, value string) string {
@@ -42,6 +44,10 @@ func TagEncoder(tag int, value string) string {
 		return encodeSpeedNDirection(value)
 	case HeightMeters:
 		return encodeHeightMeters(value)
+	case HDOP:
+		return encodeHdop(value)
+	case HWStatus:
+		return encodeHWstatus(value)
 	default:
 		return "unknow type"
 	}
@@ -176,4 +182,54 @@ func encodeHeightMeters(value string) string {
 	binary.LittleEndian.PutUint16(bs, uint16(i))
 
 	return "34" + hex.EncodeToString(bs[:])
+}
+
+// Encode tag 0x35
+// value = unit, hdop or error in meters
+// Only 1 bite
+//
+// return ecnode tag as hex string
+func encodeHdop(value string) string {
+	i, _ := strconv.Atoi(value)
+	bs := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bs, uint16(i))
+
+	return "35" + hex.EncodeToString(bs[:1])
+}
+
+// Encode tag 0x40
+// value = string (bits), status of device
+//
+// example: "1;0;0;0;1;1;0;0;0;1;0;1;0;0;0;0"
+// bits values:
+// 0: 0 - vibration level eq parking, 1 - vibration level eq movement
+// 1: 0 - tilt angle ok, 1 - tilt angle exceeded
+// 2: 0 - disable iButton key, 1 - enable iButton key
+// 3: 0 - SIM Card enable, 1 - SIM Card disable
+// 4: 0 - terminal out of GEO zone, 1 - terminal into GEO zone
+// 5: 0 - voltage is problem, 1 - voltage is ok
+// 6: 0 - enable GPS antenna, 1 - disable GPS antenna
+// 7: 0 - voltage on internal bus is ok, 1 - voltage on internal bus is problem
+// 8: 0 - external voltage is ok, 1 - external voltage  is problem
+// 9: 0 - car is off, 1 - car is on
+// 10: 0 - vibration level eq normal move, 1 - vibration level eq hit
+// 11: GPS: 0 - geo coords from internal module, 1 - geo coords from external module
+//     GLONASS: 1 - geo coords from internal module, 0 - geo coords from external module
+// 12 - 13: quality of signal 0 to 3, less is good
+// 14: 0 - alarm on, 1 - alarm off
+// 15: 0 - all fine, 1 - alarm triggered
+func encodeHWstatus(value string) string {
+	arr := strings.Split(value, ";")
+	tmp := uint16(0)
+
+	for i := range arr {
+		if arr[i] == "1" {
+			tmp |= 1 << uint(i)
+		}
+	}
+
+	bs := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bs, uint16(tmp))
+
+	return "40" + hex.EncodeToString(bs[:])
 }
