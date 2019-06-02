@@ -20,6 +20,19 @@ type TestMessage struct {
 	EnableSplitMessage bool   `yaml:"split"`
 }
 
+type MovementRoute struct {
+	Route             []string `yaml:"route"`
+	IMEI              string   `yaml:"imei"`
+	HwVersion         string   `yaml:"hw_version"`
+	FwVersion         string   `yaml:"fw_version"`
+	DeviceModel       string   `yaml:"device_model"`
+	SpeedKm           string   `yaml:"speed_km"`
+	HightMeters       string   `yaml:"hight_meters"`
+	HDOP              string   `yaml:"hdop"`
+	HWStatus          string   `yaml:"hw_status"`
+	IntervalInSeconds int      `yaml:"interval_send_signals_seconds"`
+}
+
 func handleServerAnwerOnMessage(testName string, element TestMessage, conn net.Conn) {
 	tcpReadBuf := make([]byte, 1000)
 
@@ -70,6 +83,12 @@ func runTest(testName string, messages []TestMessage) {
 func main() {
 	fmt.Println("Test Client GalileoSky 7.0")
 
+	//hexSender()
+	emulateMovmentUseCase()
+}
+
+//Send hex from file
+func hexSender() {
 	var testData map[string]TestData
 
 	yamlFile, err := ioutil.ReadFile("client_v7_test_data.yml")
@@ -91,5 +110,28 @@ func main() {
 		log.Println("[START] Test = ", key)
 		runTest(key, value.Messages)
 		log.Println("[DONE] Test = ", key)
+	}
+}
+
+//Emulate movement
+func emulateMovmentUseCase() {
+
+	var testData MovementRoute
+
+	yamlFile, err := ioutil.ReadFile("client_v7_test_movment.yml")
+
+	log.Println("Read test data")
+	if err != nil {
+		log.Fatalf("Error = %v", err)
+	}
+
+	log.Println("Unmarshal test data")
+	err = yaml.Unmarshal(yamlFile, &testData)
+	if err != nil {
+		log.Fatalf("Unmarshal =  %v", err)
+	}
+	log.Printf("Unmarshal =  %v \n", testData)
+	for _, element := range testData.Route {
+		println(element)
 	}
 }

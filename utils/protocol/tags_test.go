@@ -1,6 +1,7 @@
 package protocol
 
 import (
+	"github.com/alfssobsd/galileoskytestclient/utils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
