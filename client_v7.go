@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/hex"
-	"fmt"
+	"github.com/alfssobsd/galileoskytestclient/usecases"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
@@ -81,10 +81,13 @@ func runTest(testName string, messages []TestMessage) {
 }
 
 func main() {
-	fmt.Println("Test Client GalileoSky 7.0")
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
+	log.Println("Test Client GalileoSky 7.0")
 
+	usecases.SendOneMessageUseCase("127.0.0.1", 9998,
+		"011780011a02e703383634343935303330383631333033043200a3af", "02a3af")
 	//hexSender()
-	emulateMovmentUseCase()
+	//emulateMovmentUseCase()
 }
 
 //Send hex from file

@@ -1,5 +1,0 @@
-package usecases
-
-func SendOnePackageUseCase() {
-
-}
