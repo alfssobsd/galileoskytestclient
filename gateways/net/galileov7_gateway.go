@@ -17,16 +17,16 @@ func (e GalileoError) Error() string {
 	return fmt.Sprintf("%v", e.ErrorMessage)
 }
 
-func SendOneMessage(host string, port int, message []byte, expectedResponse []byte) error {
+func SendOnePack(host string, port int, pack []byte, expectedResponse []byte) error {
 	//connect to server
 	conn, err := Connect(host, port)
 	if err != nil {
 		return err
 	}
 
-	//send message to server
-	log.Println("sending message ", hex.EncodeToString(message))
-	_, err = conn.Write(message)
+	//send pack to server
+	log.Println("sending pack ", hex.EncodeToString(pack))
+	_, err = conn.Write(pack)
 	if err != nil {
 		return err
 	}
@@ -57,10 +57,10 @@ func Connect(host string, port int) (net.Conn, error) {
 	return conn, nil
 }
 
-func SendMessage(conn net.Conn, message []byte, expectedResponse []byte) error {
-	//send message to server
-	log.Println("sending message ", hex.EncodeToString(message))
-	_, err := conn.Write(message)
+func SendPack(conn net.Conn, pack []byte, expectedResponse []byte) error {
+	//send pack to server
+	log.Println("sending pack ", hex.EncodeToString(pack))
+	_, err := conn.Write(pack)
 	if err != nil {
 		return err
 	}
@@ -69,6 +69,7 @@ func SendMessage(conn net.Conn, message []byte, expectedResponse []byte) error {
 	tcpReadBuf := make([]byte, 1000)
 	n, err := conn.Read(tcpReadBuf)
 	if err != nil {
+		log.Println("error read response = ", err)
 		return err
 	}
 

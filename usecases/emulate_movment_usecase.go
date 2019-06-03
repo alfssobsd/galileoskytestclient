@@ -1,14 +1,13 @@
 package usecases
 
 import (
-	"encoding/binary"
 	"encoding/hex"
 	"github.com/alfssobsd/galileoskytestclient/gateways/file"
 	gatewaynet "github.com/alfssobsd/galileoskytestclient/gateways/net"
-	"github.com/alfssobsd/galileoskytestclient/utils"
 	"github.com/alfssobsd/galileoskytestclient/utils/protocol"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,17 +26,52 @@ func EmulateMovmentUseCase(host string, port int, pathToConfig string) {
 		os.Exit(-1)
 	}
 
+	hexPack, hexExpectedResponse := protocol.MakePack(protocol.DataPackEntity{
+		HwVersion:   config.HwVersion,
+		FwVersion:   config.FwVersion,
+		IMEI:        config.IMEI,
+		DeviceModel: config.DeviceModel,
+	}, true)
+
+	//make bin message for send
+	message, _ := hex.DecodeString(hexPack)
+	expectedResponse, _ := hex.DecodeString(hexExpectedResponse)
+
+	log.Printf("Send HeadPack\n")
+	err = gatewaynet.SendPack(conn, message, expectedResponse)
+	if err != nil {
+		log.Println(err)
+		os.Exit(-1)
+	}
+	log.Println("Successful send head message")
+
+	log.Printf("Prepare send MainPacks\n")
 	timestamp := int(time.Now().Unix())
+
 	for _, element := range config.Route {
+		//split lat, lon
 		arr := strings.Split(element, ",")
-		hexMessage, hexExpectedResponse := makeMessage(arr[0]+";"+arr[1], config.IMEI,
-			config.HwVersion, config.FwVersion, string(timestamp), config.DeviceModel, config.HDOP,
-			config.SpeedKm, config.HightMeters, config.HWStatus)
-		message, _ := hex.DecodeString(hexMessage)
+		//make hex pack
+		hexPack, hexExpectedResponse := protocol.MakePack(protocol.DataPackEntity{
+			HwVersion:   config.HwVersion,
+			FwVersion:   config.FwVersion,
+			IMEI:        config.IMEI,
+			DeviceModel: config.DeviceModel,
+			Timestamp:   strconv.Itoa(timestamp),
+			Lat:         arr[0],
+			Lon:         arr[1],
+			HDOP:        config.HDOP,
+			SpeedKm:     config.SpeedKm,
+			Hight:       config.HightMeters,
+			HwStatus:    config.HWStatus,
+		}, false)
+
+		//make bin pack for send
+		message, _ := hex.DecodeString(hexPack)
 		expectedResponse, _ := hex.DecodeString(hexExpectedResponse)
 
 		log.Printf("Send Lat,Lon = %v, timestamp = %v\n", arr, timestamp)
-		err := gatewaynet.SendMessage(conn, message, expectedResponse)
+		err := gatewaynet.SendPack(conn, message, expectedResponse)
 		if err != nil {
 			log.Println(err)
 			os.Exit(-1)
@@ -47,36 +81,4 @@ func EmulateMovmentUseCase(host string, port int, pathToConfig string) {
 		timestamp += config.IntervalInSeconds
 	}
 	log.Println("Successful send all data")
-}
-
-func makeMessage(latLon string, imei string, hwVersion string, fwVersion string, timestamp string,
-	deviceModel string, hdop string, speedKm string, hight string, hwStatus string) (string, string) {
-
-	var message []string
-	message = append(message, protocol.TagEncoder(protocol.HWversion, hwVersion))
-	message = append(message, protocol.TagEncoder(protocol.FWversion, fwVersion))
-	message = append(message, protocol.TagEncoder(protocol.IMEI, imei))
-	message = append(message, protocol.TagEncoder(protocol.DeviceID, deviceModel))
-	message = append(message, protocol.TagEncoder(protocol.DateTime, timestamp))
-	message = append(message, protocol.TagEncoder(protocol.LatLon, "0;7;"+latLon))
-	message = append(message, protocol.TagEncoder(protocol.SpeedNDirection, speedKm+";180"))
-	message = append(message, protocol.TagEncoder(protocol.HeightMeters, hight))
-	message = append(message, protocol.TagEncoder(protocol.HDOP, hdop))
-	message = append(message, protocol.TagEncoder(protocol.HWStatus, hwStatus))
-
-	data := strings.Join(message, "")
-	dataB, _ := hex.DecodeString(data)
-
-	dataLenB := make([]byte, 2)
-	binary.LittleEndian.PutUint16(dataLenB, uint16(len(dataB)))
-	dataLen := hex.EncodeToString(dataLenB)
-
-	hexMessage := "01" + dataLen + data
-
-	hexMessageB, _ := hex.DecodeString(hexMessage)
-	checkSumUint16 := utils.Crc16CheckSum(hexMessageB)
-	checkSubB := make([]byte, 2)
-	binary.LittleEndian.PutUint16(checkSubB, checkSumUint16)
-
-	return hexMessage + hex.EncodeToString(checkSubB), "02" + hex.EncodeToString(checkSubB)
 }

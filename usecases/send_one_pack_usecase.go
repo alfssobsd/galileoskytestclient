@@ -7,12 +7,12 @@ import (
 	"os"
 )
 
-func SendOneMessageUseCase(host string, port int, hexMessage string, hexExpectedResponse string) {
+func SendOnePackUseCase(host string, port int, hexMessage string, hexExpectedResponse string) {
 	log.Println("prepare message for send")
 	message, _ := hex.DecodeString(hexMessage)
 	expectedResponse, _ := hex.DecodeString(hexExpectedResponse)
 
-	err := gatewaynet.SendOneMessage(host, port, message, expectedResponse)
+	err := gatewaynet.SendOnePack(host, port, message, expectedResponse)
 	if err != nil {
 		log.Println(err)
 		os.Exit(-1)
