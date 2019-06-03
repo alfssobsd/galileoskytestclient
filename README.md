@@ -19,6 +19,10 @@ go build -o client_v7 client_v7.go
 ./client_v7 -help
 ```
 
+## Download Binary
+
+https://github.com/alfssobsd/galileoskytestclient/releases
+
 ## Usage
 
 ### Send just one pack
