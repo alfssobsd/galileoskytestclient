@@ -36,7 +36,7 @@ imei: 990000862471854
 hw_version: 17
 fw_version: 20
 device_model: 110
-speed_km: 30
+speed_km: 30.3
 hight_meters: 20
 hdop: 0
 hw_status: "1;0;0;0;1;1;0;0;0;1;0;1;0;0;0;0"

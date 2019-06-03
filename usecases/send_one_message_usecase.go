@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	gatewaynet "github.com/alfssobsd/galileoskytestclient/gateways/net"
 	"log"
+	"os"
 )
 
 func SendOneMessageUseCase(host string, port int, hexMessage string, hexExpectedResponse string) {
@@ -14,6 +15,8 @@ func SendOneMessageUseCase(host string, port int, hexMessage string, hexExpected
 	err := gatewaynet.SendOneMessage(host, port, message, expectedResponse)
 	if err != nil {
 		log.Println(err)
+		os.Exit(-1)
 	}
+
 	log.Println("Successful send")
 }

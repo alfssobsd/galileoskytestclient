@@ -45,13 +45,10 @@ func handler(c net.Conn) {
 			break
 		}
 
-		fmt.Printf("%s", hex.EncodeToString(buf[:n]))
-
-		if hex.EncodeToString(buf[:n]) == "011780011a02e703383634343935303330383631333033043200a3af" {
-			fmt.Println()
-			answer, _ := hex.DecodeString("02a3af")
-			_, _ = c.Write(answer)
-			fmt.Println("send answer")
-		}
+		fmt.Printf("%s\n", hex.EncodeToString(buf[:n]))
+		answerCheckSum := hex.EncodeToString(buf[n-2 : n])
+		answer, _ := hex.DecodeString("02" + answerCheckSum)
+		_, _ = c.Write(answer)
+		fmt.Println("send answer = ", hex.EncodeToString(answer))
 	}
 }
